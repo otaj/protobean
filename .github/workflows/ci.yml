@@ -17,10 +17,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
       - uses: pre-commit/action@v3.0.1
+      - name: Check commit messages
+        if: github.event_name == 'pull_request'
+        run: |
+          python -m pip install conventional-pre-commit==4.4.0
+          while IFS= read -r sha; do
+            git log -1 --format=%B "$sha" > /tmp/commit-msg
+            conventional-pre-commit --verbose /tmp/commit-msg
+          done < <(git rev-list --reverse "${{ github.event.pull_request.base.sha }}..HEAD")
 
   dart:
     runs-on: ubuntu-latest
