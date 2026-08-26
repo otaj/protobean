@@ -1,0 +1,13 @@
+# For details on buf.yaml configuration, visit https://buf.build/docs/configuration/v2/buf-yaml
+version: v2
+modules:
+  - path: proto
+lint:
+  use:
+    - STANDARD
+  except:
+    # Package names follow Beancount, not a versioned API (beancount.v1).
+    - PACKAGE_VERSION_SUFFIX
+breaking:
+  use:
+    - FILE

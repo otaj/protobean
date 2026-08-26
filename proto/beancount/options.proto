@@ -22,10 +22,11 @@ message AccountPrefixes {
 
 // How the loader chooses the built-in plugin list.
 enum PluginProcessingMode {
+  PLUGIN_PROCESSING_MODE_UNSPECIFIED = 0;
   // Run the preset plugin list, then user plugins. Parser default.
-  DEFAULT = 0;
+  PLUGIN_PROCESSING_MODE_DEFAULT = 1;
   // Run only user plugins.
-  RAW = 1;
+  PLUGIN_PROCESSING_MODE_RAW = 2;
 }
 
 // A `plugin "module" ["config"]` directive.

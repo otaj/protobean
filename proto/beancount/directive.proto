@@ -56,7 +56,7 @@ message ParsedPosting {
 //
 // `YYYY-MM-DD [txn|Flag] [[Payee] Narration] [#tags] [^links]`
 message ParsedTransaction {
-  // Always set. The `txn` keyword is stored as `special = ASTERISK`.
+  // Always set. The `txn` keyword is stored as `special = SPECIAL_FLAG_ASTERISK`.
   Flag flag = 1;
 
   // Unset when the source has no payee (a single string is the narration).

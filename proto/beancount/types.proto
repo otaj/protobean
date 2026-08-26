@@ -92,15 +92,15 @@ message Link {
 // Transaction or posting flag.
 // Special characters are the lexer FLAGS `[!&#?%]` plus `*` and `#`.
 // A single capital letter `A`–`Z` is the lexer CAPITAL token.
-// The `txn` keyword is stored as `special = ASTERISK`.
+// The `txn` keyword is stored as `special = SPECIAL_FLAG_ASTERISK`.
 enum SpecialFlag {
   SPECIAL_FLAG_UNSPECIFIED = 0;
-  ASTERISK = 1;      // *
-  EXCLAMATION = 2;   // !
-  HASH = 3;          // #
-  AMPERSAND = 4;     // &
-  QUESTION = 5;      // ?
-  PERCENT = 6;       // %
+  SPECIAL_FLAG_ASTERISK = 1; // *
+  SPECIAL_FLAG_EXCLAMATION = 2; // !
+  SPECIAL_FLAG_HASH = 3; // #
+  SPECIAL_FLAG_AMPERSAND = 4; // &
+  SPECIAL_FLAG_QUESTION = 5; // ?
+  SPECIAL_FLAG_PERCENT = 6; // %
 }
 
 message Flag {
@@ -164,17 +164,17 @@ message Meta {
 enum Booking {
   BOOKING_UNSPECIFIED = 0;
   // Reject ambiguous matches with an error. Default.
-  STRICT = 1;
-  // Like STRICT, but if a lot matches the size exactly, take the oldest.
-  STRICT_WITH_SIZE = 2;
+  BOOKING_STRICT = 1;
+  // Like BOOKING_STRICT, but if a lot matches the size exactly, take the oldest.
+  BOOKING_STRICT_WITH_SIZE = 2;
   // Disable matching; mixed inventories are allowed.
-  NONE = 3;
+  BOOKING_NONE = 3;
   // Average-cost booking: merge matching lots before and after.
-  AVERAGE = 4;
+  BOOKING_AVERAGE = 4;
   // First-in first-out on ambiguity.
-  FIFO = 5;
+  BOOKING_FIFO = 5;
   // Last-in first-out on ambiguity.
-  LIFO = 6;
+  BOOKING_LIFO = 6;
   // Highest-in first-out on ambiguity.
-  HIFO = 7;
+  BOOKING_HIFO = 7;
 }
