@@ -27,3 +27,11 @@ doc/api/
 
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# FVM
+
+# FVM Version Cache
+.fvm/
+
+# Generated Dart protobuf code
+lib/src/generated/
