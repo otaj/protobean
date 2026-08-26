@@ -1,0 +1,123 @@
+syntax = "proto3";
+
+package beancount;
+
+import "beancount/types.proto";
+
+// Options and parse-time by-products.
+//
+// User-facing values come from `option "name" "value"` (see
+// beancount.parser.options). Parse by-products (`include`, `plugin`, seen
+// commodities, and the top-level filename) live in ProcessingInfo.
+
+// Root prefixes of the five account types. Input account names must start with
+// one of these. Defaults are Assets, Liabilities, Equity, Income, Expenses.
+message AccountPrefixes {
+  string assets = 1;
+  string liabilities = 2;
+  string equity = 3;
+  string income = 4;
+  string expenses = 5;
+}
+
+// How the loader chooses the built-in plugin list.
+enum PluginProcessingMode {
+  // Run the preset plugin list, then user plugins. Parser default.
+  DEFAULT = 0;
+  // Run only user plugins.
+  RAW = 1;
+}
+
+// A `plugin "module" ["config"]` directive.
+message Plugin {
+  string name = 1;
+  // Unset when the plugin directive had no configuration string.
+  optional string config = 2;
+}
+
+// One `display_precision` entry.
+message DisplayPrecision {
+  DisplayPrecisionKey key = 1;
+  Number value = 2;
+}
+
+// One `inferred_tolerance_default` entry. The key is a currency or `*`, never a pair.
+message InferredTolerance {
+  CurrencyKey key = 1;
+  Number value = 2;
+}
+
+// Inferred number-formatting context (beancount.core.display_context.DisplayContext).
+// Distinct from the user-set `display_precision` option, which overrides this.
+message DisplayContext {
+  repeated DisplayPrecision precisions = 1;
+}
+
+// Read-only state produced while parsing, not set by `option`.
+message ProcessingInfo {
+  // Top-level input file. Unset if the input was not a named file.
+  optional string filename = 1;
+
+  // Absolute paths of included files, resolved against the file that contains
+  // each `include` directive.
+  repeated string include = 2;
+
+  // Commodities observed in the file.
+  repeated Currency commodities = 3;
+
+  repeated Plugin plugin = 4;
+
+  DisplayContext display_context = 5;
+}
+
+// User-visible options. After a successful parse every field here is populated
+// with either a source value or the parser default, except `account_rounding`
+// which is unset until the feature is enabled.
+message Options {
+  AccountPrefixes account_prefixes = 1;
+
+  string title = 2;
+
+  // Leaf names under Equity (and Income for unrealized gains).
+  Account account_previous_balances = 3;
+  Account account_previous_earnings = 4;
+  Account account_previous_conversions = 5;
+  Account account_current_earnings = 6;
+  Account account_current_conversions = 7;
+  Account account_unrealized_gains = 8;
+
+  // Unset disables automatic residual-rounding postings.
+  optional Account account_rounding = 9;
+
+  Currency conversion_currency = 10;
+
+  // Currency, pair (`USD/HOOL`), or `*` → example decimal (`0.01`).
+  repeated DisplayPrecision display_precision = 11;
+
+  // Currency or `*` (fallback for all) → tolerance decimal. See
+  // http://furius.ca/beancount/doc/tolerances
+  repeated InferredTolerance inferred_tolerance_default = 12;
+
+  Number tolerance_multiplier = 13;
+
+  bool infer_tolerance_from_cost = 14;
+
+  repeated string documents = 15;
+  repeated Currency operating_currency = 16;
+
+  bool render_commas = 17;
+
+  PluginProcessingMode plugin_processing_mode = 18;
+
+  int32 long_string_maxlines = 19;
+
+  Booking booking_method = 20;
+
+  bool use_precise_interpolation = 21;
+
+  bool insert_pythonpath = 22;
+
+  // Deprecated parser flags; still accepted and present in the options map.
+  bool allow_pipe_separator = 23;
+  bool allow_deprecated_none_for_tags_and_links = 24;
+}

@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package beancount;
+
+import "beancount/directive.proto";
+import "beancount/error.proto";
+import "beancount/options.proto";
+
+// Parsed Beancount file: either dated directives or parse errors, plus options
+// and parse-time by-products. Never both directives and errors.
+//
+// On success, directives are in the order produced by the parser after
+// chronological sort (date, then same-day type order, then line number). They
+// have not been booked or interpolated: postings still carry ParsedCost and may
+// have elided amounts.
+message ParsedLedger {
+  oneof result {
+    ParsedDirectives directives = 1;
+    Errors errors = 2;
+  }
+  Options options = 3;
+  ProcessingInfo info = 4;
+}
+
+// Fully processed Beancount file: booked, interpolated, and checked for
+// consistency. Either booked directives or processing errors, never both.
+//
+// On success, every posting has complete units; costs are resolved lots; elided
+// amounts have been filled in; inventory reductions have been matched; balance
+// assertions and other checks have passed.
+message ProcessedLedger {
+  oneof result {
+    ProcessedDirectives directives = 1;
+    Errors errors = 2;
+  }
+  Options options = 3;
+  ProcessingInfo info = 4;
+}

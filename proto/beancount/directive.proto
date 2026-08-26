@@ -1,0 +1,282 @@
+syntax = "proto3";
+
+package beancount;
+
+import "beancount/types.proto";
+
+// Directives and postings as produced by the parser, before booking and
+// interpolation. Field presence follows grammar.y and the language syntax:
+// required fields are never marked optional; optional fields use `optional`
+// or a oneof/repeated that can be empty.
+
+// Cost specification from `{...}` or `{{...}}` on a posting.
+//
+// Presence of this message means a cost basis was written. Any component may
+// still be omitted inside the braces (including empty `{}`).
+//
+// Total-cost syntax `{{amount}}` is recorded as `number_per` = 0 and
+// `number_total` set to the given amount, matching CostSpec in
+// beancount.core.position.
+message ParsedCost {
+  optional Number number_per = 1;
+  optional Number number_total = 2;
+  optional Currency currency = 3;
+  optional Date date = 4;
+  optional string label = 5;
+  // True when `*` (merge lots / average cost) was present. Always set; default
+  // false. The Python parser currently rejects merge as unsupported.
+  bool merge = 6;
+}
+
+// One posting of a transaction, as parsed.
+message ParsedPosting {
+  Location location = 1;
+  Meta meta = 2;
+
+  // Unset when the posting has no flag.
+  optional Flag flag = 3;
+
+  Account account = 4;
+
+  // Unset when the amount is fully elided (`Account` alone on the posting
+  // line). When set, number and/or currency may still be missing.
+  optional IncompleteAmount units = 5;
+
+  // Unset when no `{...}` / `{{...}}` was written.
+  optional ParsedCost cost = 6;
+
+  // Per-unit price from `@` or `@@`. Total prices (`@@`) are converted to
+  // per-unit by the parser. Unset when no price annotation was written.
+  // Number and/or currency may still be missing (`price_annotation` is an
+  // incomplete amount).
+  optional IncompleteAmount price = 7;
+}
+
+// A transaction (`txn` / flag line plus postings), as parsed.
+//
+// `YYYY-MM-DD [txn|Flag] [[Payee] Narration] [#tags] [^links]`
+message ParsedTransaction {
+  // Always set. The `txn` keyword is stored as `special = ASTERISK`.
+  Flag flag = 1;
+
+  // Unset when the source has no payee (a single string is the narration).
+  // Distinguished from an explicit empty payee (`"" ""`).
+  optional string payee = 2;
+
+  // Always set. Empty when omitted in the source.
+  string narration = 3;
+
+  // Unique tags. Never null; empty if none.
+  repeated Tag tags = 4;
+  // Unique links. Never null; empty if none.
+  repeated Link links = 5;
+
+  repeated ParsedPosting postings = 6;
+}
+
+// `YYYY-MM-DD open Account [ConstraintCurrency,...] ["BookingMethod"]`
+message Open {
+  Account account = 1;
+  // Empty means no currency restriction.
+  repeated Currency currencies = 2;
+  // Unset when no booking method was written on the open directive.
+  optional Booking booking = 3;
+}
+
+// `YYYY-MM-DD close Account`
+message Close {
+  Account account = 1;
+}
+
+// `YYYY-MM-DD commodity Currency`
+message Commodity {
+  Currency currency = 1;
+}
+
+// `YYYY-MM-DD pad Account AccountPad`
+message Pad {
+  Account account = 1;
+  Account source_account = 2;
+}
+
+// `YYYY-MM-DD balance Account Amount [~ Tolerance]`
+message Balance {
+  Account account = 1;
+  Amount amount = 2;
+  // Unset when no local `~` tolerance was written.
+  optional Number tolerance = 3;
+}
+
+// `YYYY-MM-DD note Account Description [#tags] [^links]`
+message Note {
+  Account account = 1;
+  string comment = 2;
+  repeated Tag tags = 3;
+  repeated Link links = 4;
+}
+
+// `YYYY-MM-DD event Name Value`
+message Event {
+  string name = 1;
+  string description = 2;
+}
+
+// `YYYY-MM-DD query Name SqlContents`
+message Query {
+  string name = 1;
+  string query_string = 2;
+}
+
+// `YYYY-MM-DD price Commodity Price`
+message Price {
+  Currency currency = 1;
+  Amount amount = 2;
+}
+
+// `YYYY-MM-DD document Account PathToDocument [#tags] [^links]`
+message Document {
+  Account account = 1;
+  // Path as stored by the parser (relative names are resolved against the
+  // including file).
+  string filename = 2;
+  repeated Tag tags = 3;
+  repeated Link links = 4;
+}
+
+// A single token on a `custom` directive. Types match `custom_value` in the
+// grammar: string, date, bool, amount, number, or account. There is no
+// validation that a given `type` always uses the same argument list.
+message CustomValue {
+  oneof kind {
+    string text = 1;
+    Account account = 2;
+    Date date = 3;
+    bool boolean = 4;
+    Number number = 5;
+    Amount amount = 6;
+  }
+}
+
+// `YYYY-MM-DD custom TypeName Value1 ...`
+message Custom {
+  string type = 1;
+  repeated CustomValue values = 2;
+}
+
+// One dated directive from the input. Tags and links live on ParsedTransaction,
+// Note, and Document only — the grammar does not attach them to other directive
+// types.
+//
+// Undated syntax (`option`, `plugin`, `include`, `pushtag` / `poptag`,
+// `pushmeta` / `popmeta`) does not appear here: options and plugins are in
+// Options / ProcessingInfo; push/pop tags and metadata are applied to
+// subsequent directives at parse time.
+message ParsedDirective {
+  Location location = 1;
+  Date date = 2;
+  // User-attached metadata only (filename and line numbers are on `location`).
+  Meta meta = 3;
+
+  oneof body {
+    ParsedTransaction transaction = 4;
+    Price price = 5;
+    Balance balance = 6;
+    Open open = 7;
+    Close close = 8;
+    Commodity commodity = 9;
+    Pad pad = 10;
+    Document document = 11;
+    Note note = 12;
+    Event event = 13;
+    Query query = 14;
+    Custom custom = 15;
+  }
+}
+
+// Dated directives from a successful parse, in chronological sort order
+// (date, then same-day type order, then line number).
+message ParsedDirectives {
+  repeated ParsedDirective directives = 1;
+}
+
+// Booked per-unit cost of a lot. All of `number`, `currency`, and `date` are
+// always set: missing parsed-cost fields are filled in during booking
+// (date defaults to the transaction date).
+message ProcessedCost {
+  // From the file, or generated (e.g. inferred lot date/cost) from a parsed cost.
+  oneof origin {
+    Location location = 1;
+    ParsedCost generated_from = 2;
+  }
+  Number number = 3;
+  Currency currency = 4;
+  Date date = 5;
+  optional string label = 6;
+}
+
+// A posting after booking and interpolation. Units are complete; cost is a
+// resolved lot (never a ParsedCost); price is a complete amount when present.
+message ProcessedPosting {
+  // From the file, or generated (e.g. rounding, plugin) from a parsed posting.
+  oneof origin {
+    Location location = 1;
+    ParsedPosting generated_from = 2;
+  }
+  Meta meta = 3;
+  optional Flag flag = 4;
+  Account account = 5;
+  Amount units = 6;
+  optional ProcessedCost cost = 7;
+  optional Amount price = 8;
+}
+
+// A transaction after booking and interpolation. Every posting balances; at
+// most one elided posting has been filled in; lots have been matched.
+message ProcessedTransaction {
+  // From the file, or generated (e.g. padding) from a parsed transaction.
+  oneof origin {
+    Location location = 1;
+    ParsedTransaction generated_from = 2;
+  }
+  Flag flag = 3;
+  optional string payee = 4;
+  string narration = 5;
+  repeated Tag tags = 6;
+  repeated Link links = 7;
+  repeated ProcessedPosting postings = 8;
+}
+
+// One dated directive after booking, interpolation, and consistency checks.
+// Non-transaction directives are the same types as in the parse; transactions
+// carry booked postings.
+message ProcessedDirective {
+  // From the file, or generated (e.g. pad transaction, implicit price, plugin)
+  // from the parsed directive that caused it.
+  oneof origin {
+    Location location = 1;
+    ParsedDirective generated_from = 2;
+  }
+  Date date = 3;
+  Meta meta = 4;
+
+  oneof body {
+    ProcessedTransaction transaction = 5;
+    Price price = 6;
+    Balance balance = 7;
+    Open open = 8;
+    Close close = 9;
+    Commodity commodity = 10;
+    Pad pad = 11;
+    Document document = 12;
+    Note note = 13;
+    Event event = 14;
+    Query query = 15;
+    Custom custom = 16;
+  }
+}
+
+// Booked directives from a successful processing pass, in chronological sort
+// order (date, then same-day type order, then line number).
+message ProcessedDirectives {
+  repeated ProcessedDirective directives = 1;
+}

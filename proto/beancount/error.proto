@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package beancount;
+
+import "beancount/types.proto";
+
+// A parse error (lexer, grammar, or builder). This is parser output, not a
+// later booking or plugin failure.
+message Error {
+  string message = 1;
+  Location location = 2;
+}
+
+message Errors {
+  repeated Error errors = 1;
+}

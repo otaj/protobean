@@ -1,0 +1,180 @@
+syntax = "proto3";
+
+package beancount;
+
+// Core scalar types for parser output.
+//
+// Fields without the `optional` keyword are always populated in a valid parse.
+// `optional` is used only when the Beancount grammar can omit the value.
+
+// A number as it appears in the input and after evaluation.
+//
+// Arithmetic (`+`, `-`, `*`, `/`, unary signs, parentheses) is kept in
+// `verbatim` and reduced to a decimal in `resolved`. Thousands separators in
+// the source are not present in `resolved`. Both fields are always set.
+//
+// Examples:
+//   verbatim "1,000.00"           resolved "1000.00"
+//   verbatim "((40.00/3) + 5)"    resolved "18.33333333333333333333333333"
+//   verbatim "-400.00"            resolved "-400.00"
+message Number {
+  // Text from the ledger, including grouping commas and arithmetic.
+  string verbatim = 1;
+  // Evaluated canonical decimal, no thousands separators.
+  string resolved = 2;
+}
+
+// A civil date. Beancount does not record time of day.
+// The lexer accepts years 1700–2099 with `-` or `/` separators (ISO 8601 order).
+message Date {
+  int32 year = 1;
+  int32 month = 2;
+  int32 day = 3;
+}
+
+// Source location of a parsed construct. The parser always records this;
+// `filename` may be empty when the input was not a named file.
+message Location {
+  string filename = 1;
+  // 1-based line number of the start of the construct.
+  int32 lineno_begin = 2;
+  // 1-based line number of the end of the construct. Equal to `lineno_begin`
+  // when the construct occupies a single line.
+  int32 lineno_end = 3;
+}
+
+// Colon-separated account name, e.g. "Assets:US:BofA:Checking".
+message Account {
+  string name = 1;
+}
+
+// Commodity / currency name, e.g. "USD", "HOOL", "/NQH21".
+message Currency {
+  string name = 1;
+}
+
+// A pair of currencies, written `USD/HOOL` in option values (slash order).
+message CurrencyPair {
+  Currency first = 1;
+  Currency second = 2;
+}
+
+// Sentinel for the `*` option key: all currencies.
+message AllCurrencies {}
+
+// Key for `inferred_tolerance_default`: a single currency or `*` (all).
+message CurrencyKey {
+  oneof kind {
+    Currency currency = 1;
+    AllCurrencies all = 2;
+  }
+}
+
+// Key for `display_precision`: a currency, `*`, or a pair (`USD/HOOL`).
+message DisplayPrecisionKey {
+  oneof kind {
+    Currency currency = 1;
+    AllCurrencies all = 2;
+    CurrencyPair pair = 3;
+  }
+}
+
+// Tag without the leading `#`.
+message Tag {
+  string name = 1;
+}
+
+// Link without the leading `^`.
+message Link {
+  string name = 1;
+}
+
+// Transaction or posting flag.
+// Special characters are the lexer FLAGS `[!&#?%]` plus `*` and `#`.
+// A single capital letter `A`–`Z` is the lexer CAPITAL token.
+// The `txn` keyword is stored as `special = ASTERISK`.
+enum SpecialFlag {
+  SPECIAL_FLAG_UNSPECIFIED = 0;
+  ASTERISK = 1;      // *
+  EXCLAMATION = 2;   // !
+  HASH = 3;          // #
+  AMPERSAND = 4;     // &
+  QUESTION = 5;      // ?
+  PERCENT = 6;       // %
+}
+
+message Flag {
+  oneof kind {
+    SpecialFlag special = 1;
+    string letter = 2;
+  }
+}
+
+// A complete amount: a number together with its commodity.
+// Used wherever the grammar requires `number_expr currency` (balance and price
+// directives, and custom-directive amount tokens).
+message Amount {
+  Number number = 1;
+  Currency currency = 2;
+}
+
+// Units or price on a posting, where the grammar allows either part to be
+// elided (`incomplete_amount` / `maybe_number` `maybe_currency`).
+//
+// Missing number, missing currency, or both are filled in later by
+// interpolation. A posting whose entire amount is omitted has no `units` field
+// at all (see ParsedPosting).
+message IncompleteAmount {
+  optional Number number = 1;
+  optional Currency currency = 2;
+}
+
+// A metadata value. Types match `key_value_value` in the grammar:
+// string, account, date, currency, tag, bool, number, amount, or none.
+// Absence of a value (a bare `key:` with nothing after the colon) is represented
+// by omitting `Meta.Entry.value`, not by a member of this oneof.
+message MetaValue {
+  oneof kind {
+    string text = 1;
+    Account account = 2;
+    Currency currency = 3;
+    Tag tag = 4;
+    Date date = 5;
+    bool boolean = 6;
+    Number number = 7;
+    Amount amount = 8;
+  }
+}
+
+// Key/value metadata attached to a directive or posting.
+// Keys start with a lowercase letter. If a key is repeated, the first value is
+// the one that is kept. Insertion order is preserved.
+message Meta {
+  message Entry {
+    string key = 1;
+    // Unset when the source was `key:` with no value (parsed as None).
+    optional MetaValue value = 2;
+  }
+  repeated Entry entries = 1;
+}
+
+// Inventory booking method used to resolve ambiguous lot reductions.
+// See https://beancount.github.io/docs/beancount_language_syntax.html (Open)
+// and beancount.core.data.Booking.
+enum Booking {
+  BOOKING_UNSPECIFIED = 0;
+  // Reject ambiguous matches with an error. Default.
+  STRICT = 1;
+  // Like STRICT, but if a lot matches the size exactly, take the oldest.
+  STRICT_WITH_SIZE = 2;
+  // Disable matching; mixed inventories are allowed.
+  NONE = 3;
+  // Average-cost booking: merge matching lots before and after.
+  AVERAGE = 4;
+  // First-in first-out on ambiguity.
+  FIFO = 5;
+  // Last-in first-out on ambiguity.
+  LIFO = 6;
+  // Highest-in first-out on ambiguity.
+  HIFO = 7;
+}
