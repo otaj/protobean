@@ -21,3 +21,23 @@ jobs:
         with:
           python-version: "3.13"
       - uses: pre-commit/action@v3.0.1
+
+  dart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: bufbuild/buf-action@v1
+        with:
+          version: "1.72.0"
+          setup_only: true
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
+      - name: Generate Dart package
+        run: ./tool/generate.sh
+      - name: Analyze package
+        run: |
+          dart pub get
+          dart analyze --fatal-infos
