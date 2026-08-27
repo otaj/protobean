@@ -35,3 +35,14 @@ doc/api/
 
 # Generated Dart protobuf code
 lib/src/generated/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.ruff_cache/
+*.egg-info/
+dist/
+
+# Generated Python protobuf code
+src/protobean/beancount/
