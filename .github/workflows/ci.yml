@@ -76,7 +76,7 @@ jobs:
         with:
           version: "1.72.0"
           setup_only: true
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.0.1
       - name: Generate Python package
         run: ./tool/generate_python.sh
       - uses: astral-sh/ruff-action@v4.1.0
