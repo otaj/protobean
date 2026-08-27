@@ -19,10 +19,18 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+      - uses: bufbuild/buf-action@v1
+        with:
+          version: "1.72.0"
+          setup_only: true
+      - name: Lint protobuf
+        run: |
+          buf format --diff --exit-code
+          buf lint
       - uses: actions/setup-python@v5
+        if: github.event_name == 'pull_request'
         with:
           python-version: "3.13"
-      - uses: pre-commit/action@v3.0.1
       - name: Check commit messages
         if: github.event_name == 'pull_request'
         run: |
