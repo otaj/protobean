@@ -6,6 +6,7 @@ Each pull request adds one line under **Unreleased**: the squash-merge subject (
 
 ## [Unreleased]
 
+- docs: add readme and require changelog entries on prs (#7)
 ## [0.1.0] - 2026-08-26
 
 - ci: require conventional commits (#3)
