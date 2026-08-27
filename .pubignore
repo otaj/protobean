@@ -4,7 +4,14 @@
 # Protobuf sources and Buf codegen config
 *.proto
 buf.yaml
-buf.gen.yaml
+buf.gen*.yaml
 
 # Bash scripts
 *.sh
+
+# Python package
+pyproject.toml
+uv.lock
+/src/
+*.py
+*.pyi

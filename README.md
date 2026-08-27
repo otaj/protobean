@@ -1,6 +1,6 @@
 # protobean
 
-Protobuf schemas for [Beancount](https://beancount.github.io/) ledgers, plus a generated [Dart](https://dart.dev/) package (`protobean`) that binds those messages.
+Protobuf schemas for [Beancount](https://beancount.github.io/) ledgers, plus generated [Dart](https://dart.dev/) and [Python](https://www.python.org/) packages (`protobean`) that bind those messages.
 
 The schemas cover a **parsed** ledger (parser output, including elided amounts and parse-time cost specs) and a **processed** ledger (booked, interpolated, and consistency-checked).
 
@@ -18,7 +18,7 @@ buf format --diff --exit-code
 Generated code is not committed. After `fvm use` (or otherwise putting Dart on `PATH`) and installing Buf:
 
 ```bash
-./tool/generate.sh
+./tool/generate_dart.sh
 dart pub get
 dart analyze --fatal-infos
 ```
@@ -28,6 +28,23 @@ import 'package:protobean/protobean.dart';
 ```
 
 The Dart SDK is pinned via FVM in `.fvmrc`.
+
+## Python package
+
+Generated code is not committed. After installing [uv](https://docs.astral.sh/uv/) and Buf:
+
+```bash
+./tool/generate_python.sh
+uv sync --group dev
+uv run ruff check
+uv run ruff format --check
+```
+
+```python
+from protobean import ledger_pb2
+```
+
+The Python version is pinned in `.python-version`.
 
 ## Contributing
 

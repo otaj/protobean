@@ -62,11 +62,33 @@ jobs:
           flutter-version-file: .fvmrc
           cache: true
       - name: Generate Dart package
-        run: ./tool/generate.sh
+        run: ./tool/generate_dart.sh
       - name: Analyze package
         run: |
           dart pub get
           dart analyze --fatal-infos
+
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: bufbuild/buf-action@v1
+        with:
+          version: "1.72.0"
+          setup_only: true
+      - uses: astral-sh/setup-uv@v10.0.1
+      - name: Generate Python package
+        run: ./tool/generate_python.sh
+      - uses: astral-sh/ruff-action@v4.1.0
+        with:
+          args: check
+      - uses: astral-sh/ruff-action@v4.1.0
+        with:
+          args: format --check
+      - name: Install and import
+        run: |
+          uv sync --group dev
+          uv run python -c "from protobean import ledger_pb2"
 
   changelog:
     if: github.event_name == 'pull_request'
