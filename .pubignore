@@ -1,8 +1,10 @@
 # Overrides .gitignore in this directory for `dart pub publish`.
 # Generated Dart under lib/src/generated/ stays gitignored but is published.
 
-# Protobuf sources
+# Protobuf sources and Buf codegen config
 *.proto
+buf.yaml
+buf.gen.yaml
 
 # Bash scripts
 *.sh
