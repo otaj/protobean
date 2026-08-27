@@ -1,0 +1,36 @@
+---
+description: Require a squash-commit changelog line as its own commit on every PR
+alwaysApply: true
+---
+
+# Changelog entries
+
+Every pull request must add **one** line to `CHANGELOG.md` under `## [Unreleased]`.
+
+The line is exactly the squash-merge subject and the PR number. The squash subject is the PR title (Conventional Commits). Do not invent a different summary.
+
+```markdown
+- <pr title> (#<pr number>)
+```
+
+```
+# ❌ BAD
+- Improved linting
+- feat(proto): add lot spec
+  (missing PR number; mixed into the feature commit)
+
+# ✅ GOOD
+- feat(proto): add lot spec (#12)
+  (own commit that only changes CHANGELOG.md)
+```
+
+## Separate commit
+
+The changelog line is **always** its own commit:
+
+- That commit touches **only** `CHANGELOG.md`
+- Do not mix the line with schema, CI, docs, or other edits
+- Open the PR first, then add this commit once the number is known
+- If the PR title changes, update the line to match
+
+Do not commit the changelog line until the PR exists. Feature commits land first; the changelog commit is last.
