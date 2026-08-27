@@ -6,6 +6,7 @@ Each pull request adds one line under **Unreleased**: the squash-merge subject (
 
 ## [Unreleased]
 
+- ci: lint shell scripts with shellcheck (#9)
 - chore(dart): publish generated dart without protos or scripts (#8)
 - docs: add readme and require changelog entries on prs (#7)
 ## [0.1.0] - 2026-08-26
