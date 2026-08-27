@@ -27,7 +27,7 @@ jobs:
         run: |
           buf format --diff --exit-code
           buf lint
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         if: github.event_name == 'pull_request'
         with:
           python-version: "3.13"

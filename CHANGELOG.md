@@ -6,6 +6,7 @@ Each pull request adds one line under **Unreleased**: the squash-merge subject (
 
 ## [Unreleased]
 
+- ci: bump setup-python to node 24 (#12)
 - feat(python): add a generated python package (#11)
 - chore(dart): exclude buf config from pub package (#10)
 - ci: lint shell scripts with shellcheck (#9)
