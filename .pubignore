@@ -1,0 +1,8 @@
+# Overrides .gitignore in this directory for `dart pub publish`.
+# Generated Dart under lib/src/generated/ stays gitignored but is published.
+
+# Protobuf sources
+*.proto
+
+# Bash scripts
+*.sh
