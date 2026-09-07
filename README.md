@@ -46,31 +46,6 @@ from protobean import ledger_pb2
 
 The Python version is pinned in `.python-version`.
 
-## Publishing
-
-Pushing a version tag publishes both packages. Set `version` in `pubspec.yaml` and `pyproject.toml` to the same value, then:
-
-```bash
-git tag v0.2.0
-git push origin v0.2.0
-```
-
-The workflow generates Dart and Python bindings (they are not committed) and uploads via short-lived OIDC tokens. There are no long-lived secrets.
-
-### pub.dev
-
-On the Dart package [Admin](https://pub.dev/packages/protobean/admin) tab, enable **publishing from GitHub Actions** with repository `otaj/protobean` and tag pattern `v{{version}}`. You must be an uploader on the package. See [automated publishing](https://dart.dev/tools/pub/automated-publishing).
-
-### PyPI
-
-Add a GitHub Actions [trusted publisher](https://docs.pypi.org/trusted-publishers/) for project `protobean`:
-
-- Owner: `otaj`
-- Repository: `protobean`
-- Workflow name: `publish.yml`
-
-Leave the environment blank so it matches this workflow. If the project does not exist yet, register the same values as a [pending publisher](https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/).
-
 ## Contributing
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/) and should be atomic (one concern each). Local hooks are in `.pre-commit-config.yaml`.
