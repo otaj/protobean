@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Generated Python bindings for Beancount protobuf schemas."
 readme = "README.md"
 license = "GPL-3.0-only"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 dependencies = [
     "protobuf>=6.33.5",
 ]
@@ -38,7 +38,7 @@ only-include = [
 ]
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py310"
 src = ["src"]
 respect-gitignore = false
 extend-exclude = [".venv", "dist", ".ruff_cache"]
