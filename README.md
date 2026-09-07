@@ -50,13 +50,19 @@ The Python version is pinned in `.python-version`.
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/) and should be atomic (one concern each). Local hooks are in `.pre-commit-config.yaml`.
 
-Every pull request adds **one** changelog line under `## [Unreleased]` in `CHANGELOG.md`. The line is the squash-merge subject (the PR title) and the PR number:
+Every pull request either adds **one** changelog line under `## [Unreleased]` in `CHANGELOG.md`, or cuts a release.
+
+An entry line is the squash-merge subject (the PR title) and the PR number:
 
 ```markdown
 - feat(proto): add processed ledger messages (#12)
 ```
 
-Put that line in its **own** commit that only touches `CHANGELOG.md`. Open the PR first so you have a number, then add the changelog commit. CI runs `./tool/check-changelog.sh` and rejects PRs that skip this.
+Put that line in its **own** commit that only touches `CHANGELOG.md`. Open the PR first so you have a number, then add the changelog commit.
+
+A release PR bumps the version in both `pubspec.yaml` and `pyproject.toml` and moves every Unreleased bullet under `## [<version>] - YYYY-MM-DD`, leaving Unreleased empty. Publishing a `v*` tag fails unless Unreleased is empty.
+
+CI runs `./tool/check-changelog.sh` and rejects PRs that skip this.
 
 ## License
 

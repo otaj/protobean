@@ -2,10 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
-Each pull request adds one line under **Unreleased**: the squash-merge subject (the PR title) and the PR number.
+Each pull request adds one line under **Unreleased** (the squash-merge subject and PR number), or cuts a release by bumping both package versions and moving those lines under the new version heading.
 
 ## [Unreleased]
 
+- ci: support changelog entry and release modes (#16)
 - chore(python): lower requires-python to 3.10 (#15)
 - chore: align dart and python packaging (#14)
 - ci: publish dart and python packages on version tags (#13)
