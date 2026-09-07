@@ -1,11 +1,15 @@
 ---
-description: Require a squash-commit changelog line as its own commit on every PR
+description: Require a squash-commit changelog line, or a version bump that cuts a release
 alwaysApply: true
 ---
 
 # Changelog entries
 
-Every pull request must add **one** line to `CHANGELOG.md` under `## [Unreleased]`.
+Every pull request takes **one** of two shapes.
+
+## Entry
+
+Add **one** line to `CHANGELOG.md` under `## [Unreleased]`.
 
 The line is exactly the squash-merge subject and the PR number. The squash subject is the PR title (Conventional Commits). Do not invent a different summary.
 
@@ -24,8 +28,6 @@ The line is exactly the squash-merge subject and the PR number. The squash subje
   (own commit that only changes CHANGELOG.md)
 ```
 
-## Separate commit
-
 The changelog line is **always** its own commit:
 
 - That commit touches **only** `CHANGELOG.md`
@@ -34,3 +36,19 @@ The changelog line is **always** its own commit:
 - If the PR title changes, update the line to match
 
 Do not commit the changelog line until the PR exists. Feature commits land first; the changelog commit is last.
+
+## Release
+
+Bump the version in **both** `pubspec.yaml` and `pyproject.toml` to the same new value, and move every `## [Unreleased]` bullet under a new heading, leaving Unreleased empty:
+
+```markdown
+## [Unreleased]
+
+## [0.2.0] - 2026-09-07
+
+- feat(proto): add lot spec (#12)
+```
+
+The heading must be `## [<version>] - YYYY-MM-DD` and the bullets must be the former Unreleased entries, in order.
+
+A release PR does not add a squash-subject line under Unreleased. Publishing a version tag requires Unreleased to be empty.
