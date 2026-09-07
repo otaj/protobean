@@ -1,6 +1,5 @@
 # For details on buf.gen.yaml configuration, visit https://buf.build/docs/configuration/v2/buf-gen-yaml
 version: v2
-clean: true
 plugins:
   - remote: buf.build/protocolbuffers/python:v33.5
     out: src/protobean
