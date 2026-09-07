@@ -20,4 +20,4 @@ fi
 
 dart pub global activate protoc_plugin 25.0.0
 export PATH="${PUB_CACHE:-$HOME/.pub-cache}/bin:$PATH"
-buf generate
+buf generate --template buf.gen.dart.yaml

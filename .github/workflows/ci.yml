@@ -40,6 +40,13 @@ jobs:
             conventional-pre-commit --verbose /tmp/commit-msg
           done < <(git rev-list --reverse "${{ github.event.pull_request.base.sha }}..HEAD")
 
+  versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check Dart and Python package versions match
+        run: ./tool/check-package-versions.sh
+
   shellcheck:
     runs-on: ubuntu-latest
     steps:

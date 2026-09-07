@@ -29,9 +29,8 @@ fi
 touch src/protobean/beancount/__init__.py
 
 # Generated modules import `beancount`; nest them under the protobean package.
-while IFS= read -r -d '' file; do
-  sed -i \
+find src/protobean/beancount -type f \( -name '*_pb2.py' -o -name '*_pb2.pyi' \) \
+  -exec sed -i \
     -e 's/^from beancount /from protobean.beancount /' \
     -e 's/^import beancount\./import protobean.beancount./' \
-    "$file"
-done < <(find src/protobean/beancount -type f \( -name '*_pb2.py' -o -name '*_pb2.pyi' \) -print0)
+    {} +
