@@ -6,6 +6,8 @@ Each pull request adds one line under **Unreleased** (the squash-merge subject a
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-08
+
 - ci: support changelog entry and release modes (#16)
 - chore(python): lower requires-python to 3.10 (#15)
 - chore: align dart and python packaging (#14)
