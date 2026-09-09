@@ -27,8 +27,8 @@ message Number {
 // A computed decimal with no source text.
 //
 // Unlike Number, this is not taken from the ledger: there is no `verbatim`
-// form and no separate `resolved` evaluation. Used for inventory amounts and
-// lot costs.
+// form and no separate `resolved` evaluation. Used for processed amounts,
+// inventory, and lot costs.
 message Decimal {
   string value = 1;
 }
@@ -121,9 +121,17 @@ message Flag {
 
 // A complete amount: a number together with its commodity.
 // Used wherever the grammar requires `number_expr currency` (balance and price
-// directives, and custom-directive amount tokens).
+// directives, and custom-directive amount tokens). Parsed amounts keep
+// `Number` so source text is preserved; processed amounts use ProcessedAmount.
 message Amount {
   Number number = 1;
+  Currency currency = 2;
+}
+
+// A complete amount after processing: a computed decimal together with its
+// commodity. There is no source verbatim.
+message ProcessedAmount {
+  Decimal number = 1;
   Currency currency = 2;
 }
 
@@ -163,6 +171,30 @@ message Meta {
     string key = 1;
     // Unset when the source was `key:` with no value (parsed as None).
     optional MetaValue value = 2;
+  }
+  repeated Entry entries = 1;
+}
+
+// Metadata after processing. Number and amount values are computed Decimals
+// rather than parsed Numbers.
+message ProcessedMetaValue {
+  oneof kind {
+    string text = 1;
+    Account account = 2;
+    Currency currency = 3;
+    Tag tag = 4;
+    Date date = 5;
+    bool boolean = 6;
+    Decimal number = 7;
+    ProcessedAmount amount = 8;
+  }
+}
+
+message ProcessedMeta {
+  message Entry {
+    string key = 1;
+    // Unset when the source was `key:` with no value (parsed as None).
+    optional ProcessedMetaValue value = 2;
   }
   repeated Entry entries = 1;
 }
