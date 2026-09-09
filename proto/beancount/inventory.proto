@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package beancount;
+
+import "beancount/types.proto";
+
+// Inventory: holdings of every account at a point in time.
+//
+// An Inventory is a set of per-account inventories (unique by Account). Each
+// account's holdings are split by Currency; within a currency, `amount` is the
+// total and `lots` break it down when the commodity was acquired at cost.
+
+// Booked per-unit acquisition cost of a lot. Unlike ProcessedCost, this is
+// the lot identity only (no parse origin), and the number is a computed
+// Decimal rather than a parsed Number.
+message Cost {
+  Decimal number = 1;
+  Currency currency = 2;
+  Date date = 3;
+  optional string label = 4;
+}
+
+// Amount of one commodity acquired at a specific cost.
+message Lot {
+  Decimal amount = 1;
+  Cost cost = 2;
+}
+
+// Holdings in a single currency. `amount` is always the total; when `lots` is
+// non-empty it equals the sum of the lot amounts. Lots are distinct when any
+// of cost number, currency, date, or label differ. Empty (zero) positions are
+// omitted.
+message CurrencyHoldings {
+  Currency currency = 1;
+  Decimal amount = 2;
+  repeated Lot lots = 3;
+}
+
+// Holdings of one account, split by currency (unique `Currency` per entry).
+message AccountInventory {
+  Account account = 1;
+  repeated CurrencyHoldings holdings = 2;
+}
+
+// Set of per-account inventories (unique `Account` per entry).
+message Inventory {
+  repeated AccountInventory accounts = 1;
+}
