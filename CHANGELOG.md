@@ -6,6 +6,7 @@ Each pull request adds one line under **Unreleased** (the squash-merge subject a
 
 ## [Unreleased]
 
+- feat(proto): use Decimal for processed amounts (#20)
 - feat(proto): add inventory messages (#19)
 - feat(proto): add parsed price type (#18)
 
