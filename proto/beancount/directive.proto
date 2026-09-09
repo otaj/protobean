@@ -220,7 +220,7 @@ message ProcessedCost {
     Location location = 1;
     ParsedCost generated_from = 2;
   }
-  Number number = 3;
+  Decimal number = 3;
   Currency currency = 4;
   Date date = 5;
   optional string label = 6;
@@ -235,12 +235,12 @@ message ProcessedPosting {
     Location location = 1;
     ParsedPosting generated_from = 2;
   }
-  Meta meta = 3;
+  ProcessedMeta meta = 3;
   optional Flag flag = 4;
   Account account = 5;
-  Amount units = 6;
+  ProcessedAmount units = 6;
   optional ProcessedCost cost = 7;
-  optional Amount price = 8;
+  optional ProcessedAmount price = 8;
 }
 
 // A transaction after booking and interpolation. Every posting balances; at
@@ -259,9 +259,40 @@ message ProcessedTransaction {
   repeated ProcessedPosting postings = 8;
 }
 
+// `YYYY-MM-DD balance Account Amount [~ Tolerance]` after processing.
+message ProcessedBalance {
+  Account account = 1;
+  ProcessedAmount amount = 2;
+  optional Decimal tolerance = 3;
+}
+
+// `YYYY-MM-DD price Commodity Price` after processing.
+message ProcessedPrice {
+  Currency currency = 1;
+  ProcessedAmount amount = 2;
+}
+
+// A single token on a processed `custom` directive. Number and amount values
+// are computed Decimals rather than parsed Numbers.
+message ProcessedCustomValue {
+  oneof kind {
+    string text = 1;
+    Account account = 2;
+    Date date = 3;
+    bool boolean = 4;
+    Decimal number = 5;
+    ProcessedAmount amount = 6;
+  }
+}
+
+message ProcessedCustom {
+  string type = 1;
+  repeated ProcessedCustomValue values = 2;
+}
+
 // One dated directive after booking, interpolation, and consistency checks.
-// Non-transaction directives are the same types as in the parse; transactions
-// carry booked postings.
+// Transactions carry booked postings. Directives that contain numbers use
+// processed types (`Decimal` / `ProcessedAmount`) rather than parsed `Number`.
 message ProcessedDirective {
   // From the file, or generated (e.g. pad transaction, implicit price, plugin)
   // from the parsed directive that caused it.
@@ -270,12 +301,12 @@ message ProcessedDirective {
     ParsedDirective generated_from = 2;
   }
   Date date = 3;
-  Meta meta = 4;
+  ProcessedMeta meta = 4;
 
   oneof body {
     ProcessedTransaction transaction = 5;
-    Price price = 6;
-    Balance balance = 7;
+    ProcessedPrice price = 6;
+    ProcessedBalance balance = 7;
     Open open = 8;
     Close close = 9;
     Commodity commodity = 10;
@@ -284,7 +315,7 @@ message ProcessedDirective {
     Note note = 13;
     Event event = 14;
     Query query = 15;
-    Custom custom = 16;
+    ProcessedCustom custom = 16;
   }
 }
 
