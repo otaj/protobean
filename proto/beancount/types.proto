@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package beancount;
 
-// Core scalar types for parser output.
+// Core scalar types for parser output and computed quantities.
 //
 // Fields without the `optional` keyword are always populated in a valid parse.
 // `optional` is used only when the Beancount grammar can omit the value.
@@ -22,6 +22,15 @@ message Number {
   string verbatim = 1;
   // Evaluated canonical decimal, no thousands separators.
   string resolved = 2;
+}
+
+// A computed decimal with no source text.
+//
+// Unlike Number, this is not taken from the ledger: there is no `verbatim`
+// form and no separate `resolved` evaluation. Used for inventory amounts and
+// lot costs.
+message Decimal {
+  string value = 1;
 }
 
 // A civil date. Beancount does not record time of day.
