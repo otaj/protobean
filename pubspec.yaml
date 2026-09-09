@@ -1,6 +1,6 @@
 name: protobean
 description: Generated Dart bindings for Beancount protobuf schemas.
-version: 0.2.0
+version: 0.3.0
 repository: https://github.com/otaj/protobean
 
 environment:
