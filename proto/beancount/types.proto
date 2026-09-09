@@ -118,12 +118,12 @@ message Amount {
   Currency currency = 2;
 }
 
-// Units or price on a posting, where the grammar allows either part to be
-// elided (`incomplete_amount` / `maybe_number` `maybe_currency`).
+// Units on a posting, where the grammar allows either part to be elided
+// (`incomplete_amount` / `maybe_number` `maybe_currency`).
 //
 // Missing number, missing currency, or both are filled in later by
 // interpolation. A posting whose entire amount is omitted has no `units` field
-// at all (see ParsedPosting).
+// at all (see ParsedPosting). Posting prices use ParsedPrice instead.
 message IncompleteAmount {
   optional Number number = 1;
   optional Currency currency = 2;
