@@ -28,6 +28,19 @@ message ParsedCost {
   bool merge = 6;
 }
 
+// Price annotation from `@` or `@@` on a posting.
+//
+// Presence of this message means a price was written. Number and/or currency
+// may still be missing (`price_annotation` is an incomplete amount). Total
+// prices (`@@`) keep `is_total` set; conversion to a per-unit amount happens
+// during processing, not at parse time.
+message ParsedPrice {
+  optional Number number = 1;
+  optional Currency currency = 2;
+  // True when `@@` (total price) was written. Always set; default false (`@`).
+  bool is_total = 3;
+}
+
 // One posting of a transaction, as parsed.
 message ParsedPosting {
   Location location = 1;
@@ -45,11 +58,10 @@ message ParsedPosting {
   // Unset when no `{...}` / `{{...}}` was written.
   optional ParsedCost cost = 6;
 
-  // Per-unit price from `@` or `@@`. Total prices (`@@`) are converted to
-  // per-unit by the parser. Unset when no price annotation was written.
-  // Number and/or currency may still be missing (`price_annotation` is an
-  // incomplete amount).
-  optional IncompleteAmount price = 7;
+  // Unset when no `@` / `@@` was written. When set, number and/or currency may
+  // still be missing, and `@@` is recorded as `is_total` rather than converted
+  // to per-unit.
+  optional ParsedPrice price = 7;
 }
 
 // A transaction (`txn` / flag line plus postings), as parsed.
@@ -215,7 +227,8 @@ message ProcessedCost {
 }
 
 // A posting after booking and interpolation. Units are complete; cost is a
-// resolved lot (never a ParsedCost); price is a complete amount when present.
+// resolved lot (never a ParsedCost); price is a complete per-unit amount when
+// present (`@@` totals have already been converted).
 message ProcessedPosting {
   // From the file, or generated (e.g. rounding, plugin) from a parsed posting.
   oneof origin {

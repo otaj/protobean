@@ -6,6 +6,8 @@ Each pull request adds one line under **Unreleased** (the squash-merge subject a
 
 ## [Unreleased]
 
+- feat(proto): add parsed price type (#18)
+
 ## [0.2.0] - 2026-09-08
 
 - ci: support changelog entry and release modes (#16)

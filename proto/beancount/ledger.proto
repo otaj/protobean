@@ -11,8 +11,8 @@ import "beancount/options.proto";
 //
 // On success, directives are in the order produced by the parser after
 // chronological sort (date, then same-day type order, then line number). They
-// have not been booked or interpolated: postings still carry ParsedCost and may
-// have elided amounts.
+// have not been booked or interpolated: postings still carry ParsedCost and
+// ParsedPrice and may have elided amounts.
 message ParsedLedger {
   oneof result {
     ParsedDirectives directives = 1;
@@ -26,8 +26,9 @@ message ParsedLedger {
 // consistency. Either booked directives or processing errors, never both.
 //
 // On success, every posting has complete units; costs are resolved lots; elided
-// amounts have been filled in; inventory reductions have been matched; balance
-// assertions and other checks have passed.
+// amounts have been filled in; total (`@@`) prices have been converted to
+// per-unit; inventory reductions have been matched; balance assertions and
+// other checks have passed.
 message ProcessedLedger {
   oneof result {
     ProcessedDirectives directives = 1;
